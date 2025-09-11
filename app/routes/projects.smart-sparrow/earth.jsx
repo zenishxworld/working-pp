@@ -51,6 +51,8 @@ import {
   modelLoader,
   removeLights,
   textureLoader,
+  isWebGLAvailable,
+  createSafeWebGLRenderer,
 } from '~/utils/three';
 import { throttle } from '~/utils/throttle';
 import styles from './earth.module.css';
@@ -188,16 +190,15 @@ export const Earth = ({
   }, [inViewport]);
 
   useEffect(() => {
+    if (!isWebGLAvailable()) {
+      return () => {};
+    }
     mounted.current = true;
     const { innerWidth, innerHeight } = window;
-
-    renderer.current = new WebGLRenderer({
-      canvas: canvas.current,
-      antialias: false,
-      alpha: true,
-      powerPreference: 'high-performance',
-      failIfMajorPerformanceCaveat: true,
-    });
+    renderer.current = createSafeWebGLRenderer({ canvas: canvas.current });
+    if (!renderer.current) {
+      return () => {};
+    }
     renderer.current.setPixelRatio(1);
     renderer.current.outputColorSpace = SRGBColorSpace;
     renderer.current.toneMapping = ACESFilmicToneMapping;

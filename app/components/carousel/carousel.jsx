@@ -14,7 +14,13 @@ import {
 } from 'three';
 import { resolveSrcFromSrcSet } from '~/utils/image';
 import { cssProps } from '~/utils/style';
-import { cleanRenderer, cleanScene, textureLoader } from '~/utils/three';
+import {
+  cleanRenderer,
+  cleanScene,
+  textureLoader,
+  isWebGLAvailable,
+  createSafeWebGLRenderer,
+} from '~/utils/three';
 import styles from './carousel.module.css';
 import fragment from './carousel-fragment.glsl?raw';
 import vertex from './carousel-vertex.glsl?raw';
@@ -66,14 +72,14 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
   }, [dragging]);
 
   useEffect(() => {
+    if (!isWebGLAvailable()) {
+      return () => {};
+    }
     const cameraOptions = [width / -2, width / 2, height / 2, height / -2, 1, 1000];
-    renderer.current = new WebGLRenderer({
-      canvas: canvas.current,
-      antialias: false,
-      alpha: true,
-      powerPreference: 'high-performance',
-      failIfMajorPerformanceCaveat: true,
-    });
+    renderer.current = createSafeWebGLRenderer({ canvas: canvas.current });
+    if (!renderer.current) {
+      return () => {};
+    }
     camera.current = new OrthographicCamera(...cameraOptions);
     scene.current = new Scene();
     renderer.current.setPixelRatio(2);

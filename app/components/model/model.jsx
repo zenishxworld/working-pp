@@ -36,6 +36,8 @@ import {
   modelLoader,
   removeLights,
   textureLoader,
+  isWebGLAvailable,
+  createSafeWebGLRenderer,
 } from '~/utils/three';
 import { ModelAnimationType } from './device-models';
 import { throttle } from '~/utils/throttle';
@@ -89,15 +91,17 @@ export const Model = ({
   const rotationY = useSpring(0, rotationSpringConfig);
 
   useEffect(() => {
+    if (!isWebGLAvailable()) {
+      setLoaded(true);
+      return;
+    }
     const { clientWidth, clientHeight } = container.current;
 
-    renderer.current = new WebGLRenderer({
-      canvas: canvas.current,
-      alpha: true,
-      antialias: false,
-      powerPreference: 'high-performance',
-      failIfMajorPerformanceCaveat: true,
-    });
+    renderer.current = createSafeWebGLRenderer({ canvas: canvas.current });
+    if (!renderer.current) {
+      setLoaded(true);
+      return;
+    }
 
     renderer.current.setPixelRatio(2);
     renderer.current.setSize(clientWidth, clientHeight);

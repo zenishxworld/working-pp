@@ -18,7 +18,7 @@ import {
 } from 'three';
 import { media } from '~/utils/style';
 import { throttle } from '~/utils/throttle';
-import { cleanRenderer, cleanScene, removeLights } from '~/utils/three';
+import { cleanRenderer, cleanScene, removeLights, isWebGLAvailable, createSafeWebGLRenderer } from '~/utils/three';
 import fragmentShader from './displacement-sphere-fragment.glsl?raw';
 import vertexShader from './displacement-sphere-vertex.glsl?raw';
 import styles from './displacement-sphere.module.css';
@@ -49,15 +49,15 @@ export const DisplacementSphere = props => {
   const rotationY = useSpring(0, springConfig);
 
   useEffect(() => {
+    if (!isWebGLAvailable()) {
+      return () => {};
+    }
     const { innerWidth, innerHeight } = window;
     mouse.current = new Vector2(0.8, 0.5);
-    renderer.current = new WebGLRenderer({
-      canvas: canvasRef.current,
-      antialias: false,
-      alpha: true,
-      powerPreference: 'high-performance',
-      failIfMajorPerformanceCaveat: true,
-    });
+    renderer.current = createSafeWebGLRenderer({ canvas: canvasRef.current });
+    if (!renderer.current) {
+      return () => {};
+    }
     renderer.current.setSize(innerWidth, innerHeight);
     renderer.current.setPixelRatio(1);
     renderer.current.outputColorSpace = LinearSRGBColorSpace;

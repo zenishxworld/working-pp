@@ -1,4 +1,4 @@
-import { Cache, TextureLoader } from 'three';
+import { Cache, TextureLoader, WebGLRenderer } from 'three';
 import { DRACOLoader, GLTFLoader } from 'three-stdlib';
 
 // Enable caching for all loaders
@@ -57,6 +57,50 @@ export const cleanMaterial = material => {
 export const cleanRenderer = renderer => {
   renderer.dispose();
   renderer = null;
+};
+
+/**
+ * Check if the environment can create a WebGL context
+ */
+export const isWebGLAvailable = () => {
+  if (typeof window === 'undefined') return true;
+  try {
+    const canvas = document.createElement('canvas');
+    const optsList = [
+      {},
+      { alpha: true },
+      { alpha: true, antialias: false },
+    ];
+    for (const opts of optsList) {
+      const gl =
+        canvas.getContext('webgl', opts) || canvas.getContext('experimental-webgl', opts);
+      if (gl) {
+        gl.getExtension('WEBGL_lose_context')?.loseContext?.();
+        return true;
+      }
+    }
+    return false;
+  } catch (e) {
+    return false;
+  }
+};
+
+/**
+ * Safely create a WebGLRenderer; returns null if context creation fails.
+ */
+export const createSafeWebGLRenderer = (options = {}) => {
+  try {
+    return new WebGLRenderer({
+      antialias: false,
+      alpha: true,
+      powerPreference: 'high-performance',
+      failIfMajorPerformanceCaveat: false,
+      ...options,
+    });
+  } catch (e) {
+    console.error('WebGL initialization failed', e);
+    return null;
+  }
 };
 
 /**
