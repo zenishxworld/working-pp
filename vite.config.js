@@ -17,7 +17,11 @@ export default defineConfig({
     assetsInlineLimit: 1024,
   },
   server: {
-    port: 7777,
+    host: '0.0.0.0',
+    port: 5000,
+    hmr: {
+      clientPort: 443,
+    },
   },
   plugins: [
     mdx({
