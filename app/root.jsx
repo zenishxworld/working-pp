@@ -98,19 +98,20 @@ export default function App() {
       `${config.ascii}\n`,
       `Taking a peek huh? Check out the source code: ${config.repo}\n\n`
     );
-  }, []);
+    
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeColorMeta) {
+      themeColorMeta.setAttribute('content', theme === 'dark' ? '#111' : '#F2F2F2');
+    }
+  }, [theme]);
 
   return (
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {/* Theme color doesn't support oklch so I'm hard coding these hexes for now */}
-        <meta name="theme-color" content={theme === 'dark' ? '#111' : '#F2F2F2'} />
-        <meta
-          name="color-scheme"
-          content={theme === 'light' ? 'light dark' : 'dark light'}
-        />
+        <meta name="theme-color" content="#111" />
+        <meta name="color-scheme" content="dark light" />
         <style dangerouslySetInnerHTML={{ __html: themeStyles }} />
         <Meta />
         <Links />

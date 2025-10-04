@@ -64,7 +64,7 @@ export function Intro({ id, sectionRef, scrollIndicatorHidden, ...rest }) {
         {({ visible, status }) => (
           <>
             {isHydrated && (
-              <Suspense>
+              <Suspense fallback={null}>
                 <DisplacementSphere />
               </Suspense>
             )}
